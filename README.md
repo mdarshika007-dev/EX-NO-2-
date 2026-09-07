@@ -95,10 +95,135 @@ CFSUPM
 ---
 
 ## PROGRAM
+~~~
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
+char matrix[5][5];
 
-```
----
+// Create Playfair matrix
+void generateMatrix(char key[])
+{
+    int used[26] = {0};
+    int i, j, k = 0, len = strlen(key);
+
+    used['J' - 'A'] = 1;   // I and J are treated as same
+
+    for(i = 0; i < len; i++)
+    {
+        char ch = toupper(key[i]);
+        if(ch == 'J')
+            ch = 'I';
+
+        if(ch >= 'A' && ch <= 'Z' && !used[ch - 'A'])
+        {
+            matrix[k / 5][k % 5] = ch;
+            used[ch - 'A'] = 1;
+            k++;
+        }
+    }
+
+    for(i = 0; i < 26; i++)
+    {
+        if(!used[i])
+        {
+            matrix[k / 5][k % 5] = i + 'A';
+            k++;
+        }
+    }
+}
+
+// Find position of a character
+void findPosition(char ch, int *row, int *col)
+{
+    if(ch == 'J')
+        ch = 'I';
+
+    for(int i = 0; i < 5; i++)
+    {
+        for(int j = 0; j < 5; j++)
+        {
+            if(matrix[i][j] == ch)
+            {
+                *row = i;
+                *col = j;
+                return;
+            }
+        }
+    }
+}
+
+int main()
+{
+    char key[100], text[100], msg[200];
+    int i, len = 0;
+
+    printf("Enter keyword: ");
+    scanf("%s", key);
+
+    printf("Enter plaintext: ");
+    scanf("%s", text);
+
+    generateMatrix(key);
+
+    printf("\nPlayfair Matrix:\n");
+    for(i = 0; i < 5; i++)
+    {
+        for(int j = 0; j < 5; j++)
+            printf("%c ", matrix[i][j]);
+        printf("\n");
+    }
+
+    // Prepare plaintext
+    for(i = 0; text[i] != '\0'; i++)
+    {
+        char ch = toupper(text[i]);
+        if(ch == 'J')
+            ch = 'I';
+
+        if(len > 0 && len % 2 == 1 && msg[len - 1] == ch)
+            msg[len++] = 'X';
+
+        msg[len++] = ch;
+    }
+
+    if(len % 2 != 0)
+        msg[len++] = 'X';
+
+    msg[len] = '\0';
+
+    printf("\nCipher Text: ");
+
+    for(i = 0; i < len; i += 2)
+    {
+        int r1, c1, r2, c2;
+        findPosition(msg[i], &r1, &c1);
+        findPosition(msg[i + 1], &r2, &c2);
+
+        if(r1 == r2)
+        {
+            printf("%c%c", matrix[r1][(c1 + 1) % 5],
+                           matrix[r2][(c2 + 1) % 5]);
+        }
+        else if(c1 == c2)
+        {
+            printf("%c%c", matrix[(r1 + 1) % 5][c1],
+                           matrix[(r2 + 1) % 5][c2]);
+        }
+        else
+        {
+            printf("%c%c", matrix[r1][c2],
+                           matrix[r2][c1]);
+        }
+    }
+
+    printf("\n");
+
+    return 0;
+}
+
+~~~
 
 ## SAMPLE INPUT
 
@@ -129,12 +254,8 @@ Cipher Text : CFSUPM
 
 ## OUTPUT SCREENSHOT
 
+<img width="848" height="616" alt="image" src="https://github.com/user-attachments/assets/850c1c47-e787-4406-ba0e-33e288fffb39" />
 
-Example:
-
-<img width="1715" height="618" alt="image" src="https://github.com/user-attachments/assets/2fb31f20-41a8-4f8b-b2d0-885ac71c72b5" />
-
----
 
 ## RESULT
 
